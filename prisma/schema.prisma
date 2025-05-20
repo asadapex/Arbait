@@ -42,11 +42,10 @@ model Region {
 }
 
 model Level {
-  id       Int        @id @default(autoincrement())
+  id       Int       @id @default(autoincrement())
   level    String
   Master   Master[]
-  products Product[]
-  PrdLevel PrdLevel[]
+  products Product[] @relation("PrdLevel")
 }
 
 model Brand {
@@ -85,8 +84,7 @@ model Product {
   name           String
   image          String?
   minWorkingHour Int
-  levels         Level[]
-  PrdLevel       PrdLevel[]
+  levels         Level[]         @relation("PrdLevel")
   price_hourly   Int
   price_daily    Int
   masters        Master[]
@@ -97,14 +95,6 @@ model MasterProduct {
   id        Int     @id @default(autoincrement())
   master    Master  @relation(fields: [masterId], references: [id])
   masterId  Int
-  product   Product @relation(fields: [productId], references: [id])
-  productId Int
-}
-
-model PrdLevel {
-  id        Int     @id @default(autoincrement())
-  level     Level   @relation(fields: [levelId], references: [id])
-  levelId   Int
   product   Product @relation(fields: [productId], references: [id])
   productId Int
 }

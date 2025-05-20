@@ -3,22 +3,18 @@ import {
   InternalServerErrorException,
   NotFoundException,
 } from '@nestjs/common';
-import { CreateMasterDto } from './dto/create-master.dto';
-import { UpdateMasterDto } from './dto/update-master.dto';
+import { CreateBrandDto } from './dto/create-brand.dto';
+import { UpdateBrandDto } from './dto/update-brand.dto';
 import { PrismaService } from 'src/prisma/prisma.service';
-import { Request } from 'express';
 
 @Injectable()
-export class MasterService {
+export class BrandService {
   constructor(private readonly prisma: PrismaService) {}
 
-  async create(data: CreateMasterDto, req: Request) {
+  async create(data: CreateBrandDto) {
     try {
-      const newMaster = await this.prisma.master.create({
-        data: { ...data, star: 0 },
-      });
-
-      return newMaster;
+      const newBrand = await this.prisma.brand.create({ data });
+      return newBrand;
     } catch (error) {
       if (error != InternalServerErrorException) {
         throw error;
@@ -30,9 +26,9 @@ export class MasterService {
     }
   }
 
-  async findAll(req: Request) {
+  async findAll() {
     try {
-      const all = await this.prisma.master.findMany();
+      const all = await this.prisma.brand.findMany();
       return all;
     } catch (error) {
       if (error != InternalServerErrorException) {
@@ -47,9 +43,9 @@ export class MasterService {
 
   async findOne(id: number) {
     try {
-      const one = await this.prisma.master.findUnique({ where: { id } });
+      const one = await this.prisma.brand.findUnique({ where: { id } });
       if (!one) {
-        throw new NotFoundException({ message: 'Master not found' });
+        throw new NotFoundException({ message: 'Brand not found' });
       }
       return one;
     } catch (error) {
@@ -63,16 +59,15 @@ export class MasterService {
     }
   }
 
-  async update(id: number, updateMasterDto: UpdateMasterDto) {
+  async update(id: number, data: UpdateBrandDto) {
     try {
-      const one = await this.prisma.master.findUnique({ where: { id } });
+      const one = await this.prisma.brand.findUnique({ where: { id } });
       if (!one) {
-        throw new NotFoundException({ message: 'Master not found' });
+        throw new NotFoundException({ message: 'Brand not found' });
       }
-
-      const updated = await this.prisma.master.update({
+      const updated = await this.prisma.level.update({
         where: { id },
-        data: updateMasterDto,
+        data,
       });
       return updated;
     } catch (error) {
@@ -88,12 +83,11 @@ export class MasterService {
 
   async remove(id: number) {
     try {
-      const one = await this.prisma.master.findUnique({ where: { id } });
+      const one = await this.prisma.brand.findUnique({ where: { id } });
       if (!one) {
-        throw new NotFoundException({ message: 'Master not found' });
+        throw new NotFoundException({ message: 'Brand not found' });
       }
-
-      const deleted = await this.prisma.master.delete({ where: { id } });
+      const deleted = await this.prisma.brand.delete({ where: { id } });
       return deleted;
     } catch (error) {
       if (error != InternalServerErrorException) {

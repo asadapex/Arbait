@@ -13,6 +13,7 @@ import * as bcrypt from 'bcrypt';
 import { VerifyUserDto } from './dto/verify-user.dto';
 import { ResendOtpAuthDto } from './dto/resend-otp.dto';
 import { LoginUserDto } from './dto/login-user.dto';
+import { JwtService } from '@nestjs/jwt';
 
 totp.options = {
   step: 120,
@@ -24,6 +25,7 @@ export class UserService {
   constructor(
     private readonly prisma: PrismaService,
     private readonly mailService: MailerService,
+    private readonly jwt: JwtService,
   ) {}
 
   generateOtpHtml(code: string): string {
@@ -152,7 +154,8 @@ export class UserService {
         });
       }
 
-      return 'aa';
+      const token = this.jwt.sign({ id: user.id, role: user.role });
+      return { token };
     } catch (error) {
       if (error != InternalServerErrorException) {
         throw error;

@@ -6,9 +6,29 @@ import { RegionModule } from './region/region.module';
 import { PrismaModule } from './prisma/prisma.module';
 import { MailerService } from './mailer/mailer.service';
 import { MasterModule } from './master/master.module';
+import { JwtModule } from '@nestjs/jwt';
+import { LevelModule } from './level/level.module';
+import { BrandModule } from './brand/brand.module';
+import { SizeModule } from './size/size.module';
+import { CapacityModule } from './capacity/capacity.module';
+import { ProductModule } from './product/product.module';
 
 @Module({
-  imports: [UserModule, RegionModule, PrismaModule, MasterModule],
+  imports: [
+    UserModule,
+    RegionModule,
+    PrismaModule,
+    MasterModule,
+    JwtModule.register({
+      global: true,
+      secret: 'apex',
+    }),
+    LevelModule,
+    BrandModule,
+    SizeModule,
+    CapacityModule,
+    ProductModule,
+  ],
   controllers: [AppController],
   providers: [AppService, MailerService],
 })
