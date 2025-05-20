@@ -1,0 +1,110 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+// Looking for ways to speed up your queries, or scale easily with your serverless or edge functions?
+// Try Prisma Accelerate: https://pris.ly/cli/accelerate-init
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+enum UserRole {
+  ADMIN
+  USER
+}
+
+enum UserStatus {
+  PENDING
+  ACTIVE
+}
+
+model User {
+  id       Int        @id @default(autoincrement())
+  fullname String
+  email    String     @unique
+  password String
+  region   Region     @relation(fields: [regionId], references: [id])
+  role     UserRole
+  image    String?
+  regionId Int
+  status   UserStatus
+}
+
+model Region {
+  id   Int    @id @default(autoincrement())
+  name String
+  User User[]
+}
+
+model Level {
+  id       Int        @id @default(autoincrement())
+  level    String
+  Master   Master[]
+  products Product[]
+  PrdLevel PrdLevel[]
+}
+
+model Brand {
+  id   Int    @id @default(autoincrement())
+  name String
+}
+
+model Size {
+  id   Int    @id @default(autoincrement())
+  size String
+}
+
+model Capacity {
+  id       Int    @id @default(autoincrement())
+  capacity String
+}
+
+model Master {
+  id            Int             @id @default(autoincrement())
+  fullname      String
+  phone         String
+  isActive      Boolean
+  year          Int
+  level         Level           @relation(fields: [levelId], references: [id])
+  levelId       Int
+  image         String?
+  star          Float
+  about         String
+  products      Product[]
+  MasterProduct MasterProduct[]
+}
+
+model Product {
+  id             Int             @id @default(autoincrement())
+  isActive       Boolean
+  name           String
+  image          String?
+  minWorkingHour Int
+  levels         Level[]
+  PrdLevel       PrdLevel[]
+  price_hourly   Int
+  price_daily    Int
+  masters        Master[]
+  MasterProduct  MasterProduct[]
+}
+
+model MasterProduct {
+  id        Int     @id @default(autoincrement())
+  master    Master  @relation(fields: [masterId], references: [id])
+  masterId  Int
+  product   Product @relation(fields: [productId], references: [id])
+  productId Int
+}
+
+model PrdLevel {
+  id        Int     @id @default(autoincrement())
+  level     Level   @relation(fields: [levelId], references: [id])
+  levelId   Int
+  product   Product @relation(fields: [productId], references: [id])
+  productId Int
+}
