@@ -186,4 +186,13 @@ export class UserService {
     });
     return { session };
   }
+
+  async me(req: Request) {
+    let id = req['user-id'];
+    let user = await this.prisma.user.findUnique({
+      where: { id },
+      include: { region: true },
+    });
+    return user;
+  }
 }

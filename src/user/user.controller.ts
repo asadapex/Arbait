@@ -42,8 +42,14 @@ export class UserController {
   }
 
   @UseGuards(AuthGuard)
-  @Get('allSessions')
+  @Get('my-sessions')
   getSessions(@Req() req: Request) {
     return this.userService.allSession(req);
+  }
+
+  @UseGuards(AuthGuard)
+  @Get('me')
+  me(@Req() req: Request) {
+    return this.userService.me(req);
   }
 }
