@@ -6,7 +6,6 @@ import {
 } from '@nestjs/common';
 import { CreateUserDto } from './dto/create-user.dto';
 import { PrismaService } from 'src/prisma/prisma.service';
-import { UserStatus } from '@prisma/client';
 import { MailerService } from 'src/mailer/mailer.service';
 import { totp } from 'otplib';
 import * as bcrypt from 'bcrypt';
@@ -14,6 +13,8 @@ import { VerifyUserDto } from './dto/verify-user.dto';
 import { ResendOtpAuthDto } from './dto/resend-otp.dto';
 import { LoginUserDto } from './dto/login-user.dto';
 import { JwtService } from '@nestjs/jwt';
+import { UserStatus } from '@prisma/client';
+import { Request } from 'express';
 
 totp.options = {
   step: 120,
@@ -45,7 +46,7 @@ export class UserService {
   }
 
   async findUser(email: string) {
-    const user = await this.prisma.user.findUnique({ where: { email } });
+    const user = await this.prisma.user.findFirst({ where: { email } });
     return user;
   }
 
@@ -136,7 +137,7 @@ export class UserService {
     }
   }
 
-  async login(dto: LoginUserDto) {
+  async login(dto: LoginUserDto, req: Request) {
     try {
       const user = await this.findUser(dto.email);
       if (!user) {
@@ -154,6 +155,17 @@ export class UserService {
         });
       }
 
+      let session = await this.prisma.session.findFirst({
+        where: { userId: user.id, ip: req.ip },
+      });
+      if (!session) {
+        if (req.ip) {
+          await this.prisma.session.create({
+            data: { userId: user.id, ip: req.ip },
+          });
+        }
+      }
+
       const token = this.jwt.sign({ id: user.id, role: user.role });
       return { token };
     } catch (error) {
@@ -165,5 +177,13 @@ export class UserService {
         message: 'Something went wrong',
       });
     }
+  }
+
+  async allSession(req: Request) {
+    let user = req['user-id'];
+    let session = await this.prisma.session.findMany({
+      where: { userId: user },
+    });
+    return { session };
   }
 }

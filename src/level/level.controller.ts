@@ -28,13 +28,11 @@ export class LevelController {
     return this.levelService.create(createLevelDto);
   }
 
-  @UseGuards(AuthGuard)
   @Get()
   findAll() {
     return this.levelService.findAll();
   }
 
-  @UseGuards(AuthGuard)
   @Get(':id')
   findOne(@Param('id') id: string) {
     return this.levelService.findOne(+id);

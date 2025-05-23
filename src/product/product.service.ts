@@ -1,12 +1,11 @@
 import {
   Injectable,
-  InternalServerErrorException,
   NotFoundException,
+  BadRequestException,
 } from '@nestjs/common';
+import { PrismaService } from 'src/prisma/prisma.service';
 import { CreateProductDto } from './dto/create-product.dto';
 import { UpdateProductDto } from './dto/update-product.dto';
-import { PrismaService } from 'src/prisma/prisma.service';
-import { Prisma } from '@prisma/client';
 
 @Injectable()
 export class ProductService {
@@ -14,134 +13,87 @@ export class ProductService {
 
   async create(data: CreateProductDto) {
     try {
-      const levels = await this.prisma.level.findMany({
-        where: { id: { in: data.levels } },
+      const product = await this.prisma.product.create({
+        data: { ...data },
       });
-      if (levels.length !== data.levels.length) {
-        throw new NotFoundException({
-          message: 'One or more levels not found',
-        });
-      }
-
-      const newPrd = await this.prisma.product.create({
-        data: {
-          ...data,
-          levels: { connect: data.levels.map((id) => ({ id })) },
-        },
-      });
-      return newPrd;
+      return product;
     } catch (error) {
-      if (error != InternalServerErrorException) {
-        throw error;
-      }
-      console.log(error);
-      throw new InternalServerErrorException({
-        message: 'Internal server error',
-      });
+      throw new BadRequestException(`Error creating product: ${error.message}`);
     }
   }
 
-  async findAll(query: any) {
+  async findAll(page: number = 1, limit: number = 10) {
     try {
-      const { search = '', sortName = 'asc', limit = 10, page = 1 } = query;
-
-      const take = Number(limit);
-      const skip = (Number(page) - 1) * take;
-
-      const where: Prisma.ProductWhereInput = search
-        ? {
-            name: {
-              contains: search,
-              mode: Prisma.QueryMode.insensitive,
-            },
-          }
-        : {};
-
       const all = await this.prisma.product.findMany({
-        where,
-        orderBy: {
-          name: sortName.toLowerCase() === 'desc' ? 'desc' : 'asc',
+        skip: (page - 1) * limit,
+        take: limit,
+        include: {
+          masterProfession: true,
+          productLevel: true,
+          tools: true,
         },
-        skip,
-        take,
-        include: { levels: true },
       });
 
-      const total = await this.prisma.product.count({ where });
+      const totalCount = await this.prisma.product.count();
 
       return {
         data: all,
         meta: {
-          total,
-          page: Number(page),
-          limit: Number(limit),
-          totalPages: Math.ceil(total / take),
+          currentPage: page,
+          totalPages: Math.ceil(totalCount / limit),
+          totalItems: totalCount,
+          limit: limit,
         },
       };
     } catch (error) {
-      console.error(error);
-      throw new InternalServerErrorException({
-        message: 'Internal server error',
-      });
+      throw new BadRequestException(
+        `Error retrieving products: ${error.message}`,
+      );
     }
   }
 
   async findOne(id: number) {
     try {
-      const one = await this.prisma.product.findUnique({ where: { id } });
+      const one = await this.prisma.product.findUnique({
+        where: { id },
+        include: {
+          masterProfession: true,
+          productLevel: true,
+          tools: true,
+        },
+      });
+
       if (!one) {
-        throw new NotFoundException({ message: 'Product not found' });
+        throw new NotFoundException(`Product not found`);
       }
+
       return one;
     } catch (error) {
-      if (error != InternalServerErrorException) {
-        throw error;
-      }
-      console.log(error);
-      throw new InternalServerErrorException({
-        message: 'Internal server error',
-      });
+      throw new NotFoundException(`Error retrieving product: ${error.message}`);
     }
   }
 
   async update(id: number, data: UpdateProductDto) {
     try {
-      const one = await this.prisma.product.findUnique({ where: { id } });
-      if (!one) {
-        throw new NotFoundException({ message: 'Product not found' });
-      }
       const updated = await this.prisma.product.update({
         where: { id },
-        data: { ...data, levels: { set: data.levels?.map((id) => ({ id })) } },
+        data: { ...data },
       });
+      await this.prisma.basket.deleteMany();
       return updated;
     } catch (error) {
-      if (error != InternalServerErrorException) {
-        throw error;
-      }
-      console.log(error);
-      throw new InternalServerErrorException({
-        message: 'Internal server error',
-      });
+      throw new NotFoundException(`Error updating product: ${error.message}`);
     }
   }
 
   async remove(id: number) {
     try {
-      const one = await this.prisma.product.findUnique({ where: { id } });
-      if (!one) {
-        throw new NotFoundException({ message: 'Product not found' });
-      }
-      const deleted = await this.prisma.product.delete({ where: { id } });
+      const deleted = await this.prisma.product.delete({
+        where: { id },
+      });
       return deleted;
     } catch (error) {
-      if (error != InternalServerErrorException) {
-        throw error;
-      }
-      console.log(error);
-      throw new InternalServerErrorException({
-        message: 'Internal server error',
-      });
+      throw new NotFoundException(`Error deleting product: ${error.message}`);
     }
   }
 }

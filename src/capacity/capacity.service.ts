@@ -1,4 +1,5 @@
 import {
+  BadRequestException,
   Injectable,
   InternalServerErrorException,
   NotFoundException,
@@ -13,6 +14,12 @@ export class CapacityService {
 
   async create(data: CreateCapacityDto) {
     try {
+      const capacity = await this.prisma.capacity.findFirst({
+        where: { name: data.name },
+      });
+      if (capacity) {
+        throw new BadRequestException({ message: 'Capacity already exists' });
+      }
       const newCapacoty = await this.prisma.capacity.create({ data });
       return newCapacoty;
     } catch (error) {

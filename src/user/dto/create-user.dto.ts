@@ -14,7 +14,7 @@ import {
 export class CreateUserDto {
   @ApiProperty({ type: String, example: 'John Doe' })
   @IsString()
-  fullname: string;
+  name: string;
 
   @ApiProperty({ type: String, example: 'johndoe@gmail.com' })
   @IsEmail()

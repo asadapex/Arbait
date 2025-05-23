@@ -12,6 +12,13 @@ import { BrandModule } from './brand/brand.module';
 import { SizeModule } from './size/size.module';
 import { CapacityModule } from './capacity/capacity.module';
 import { ProductModule } from './product/product.module';
+import { ToolModule } from './tool/tool.module';
+import { OrderModule } from './order/order.module';
+import { CommentModule } from './comment/comment.module';
+import { BasketModule } from './basket/basket.module';
+import { FaqModule } from './faq/faq.module';
+import { ContactModule } from './contact/contact.module';
+import { GeneralInfoModule } from './generalinfo/generalinfo.module';
 
 @Module({
   imports: [
@@ -28,6 +35,13 @@ import { ProductModule } from './product/product.module';
     SizeModule,
     CapacityModule,
     ProductModule,
+    ToolModule,
+    OrderModule,
+    CommentModule,
+    BasketModule,
+    FaqModule,
+    ContactModule,
+    GeneralInfoModule,
   ],
   controllers: [AppController],
   providers: [AppService, MailerService],

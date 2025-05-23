@@ -28,13 +28,11 @@ export class CapacityController {
     return this.capacityService.create(createCapacityDto);
   }
 
-  @UseGuards(AuthGuard)
   @Get()
   findAll() {
     return this.capacityService.findAll();
   }
-
-  @UseGuards(AuthGuard)
+ 
   @Get(':id')
   findOne(@Param('id') id: string) {
     return this.capacityService.findOne(+id);

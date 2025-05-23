@@ -28,13 +28,11 @@ export class SizeController {
     return this.sizeService.create(createSizeDto);
   }
 
-  @UseGuards(AuthGuard)
   @Get()
   findAll() {
     return this.sizeService.findAll();
   }
 
-  @UseGuards(AuthGuard)
   @Get(':id')
   findOne(@Param('id') id: string) {
     return this.sizeService.findOne(+id);

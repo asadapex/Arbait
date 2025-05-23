@@ -1,108 +1,172 @@
-import {
-  Injectable,
-  InternalServerErrorException,
-  NotFoundException,
-} from '@nestjs/common';
+import { Injectable, NotFoundException } from '@nestjs/common';
 import { CreateMasterDto } from './dto/create-master.dto';
 import { UpdateMasterDto } from './dto/update-master.dto';
 import { PrismaService } from 'src/prisma/prisma.service';
-import { Request } from 'express';
 
 @Injectable()
 export class MasterService {
   constructor(private readonly prisma: PrismaService) {}
 
-  async create(data: CreateMasterDto, req: Request) {
-    try {
-      const newMaster = await this.prisma.master.create({
-        data: { ...data, star: 0 },
-      });
-
-      return newMaster;
-    } catch (error) {
-      if (error != InternalServerErrorException) {
-        throw error;
-      }
-      console.log(error);
-      throw new InternalServerErrorException({
-        message: 'Internal server error',
-      });
+  async create(createMasterDto: CreateMasterDto) {
+    const { MasterProduct, ...masterData } = createMasterDto;
+    let profession = await this.prisma.product.findUnique({
+      where: { id: MasterProduct[0].productId },
+    });
+    if (!profession) {
+      throw new NotFoundException('Not found Product');
     }
+    let level = await this.prisma.level.findUnique({
+      where: { id: MasterProduct[0].levelId },
+    });
+    if (!level) {
+      throw new NotFoundException('Not found level');
+    }
+    const createdMaster = await this.prisma.master.create({
+      data: {
+        ...masterData,
+      },
+    });
+
+    if (MasterProduct && MasterProduct.length > 0) {
+      await Promise.all(
+        MasterProduct.map((product) =>
+          this.prisma.masterProduct.create({
+            data: {
+              ...product,
+              masterId: createdMaster.id,
+            },
+          }),
+        ),
+      );
+    }
+    return createdMaster;
   }
 
-  async findAll(req: Request) {
-    try {
-      const all = await this.prisma.master.findMany();
-      return all;
-    } catch (error) {
-      if (error != InternalServerErrorException) {
-        throw error;
-      }
-      console.log(error);
-      throw new InternalServerErrorException({
-        message: 'Internal server error',
-      });
-    }
+  async findAll(query: any) {
+    const { page = 1, limit = 10 } = query;
+    const skip = (page - 1) * limit;
+    const take = limit;
+
+    const masters = await this.prisma.master.findMany({
+      skip,
+      take,
+      include: {
+        MasterProduct: {
+          include: {
+            level: true,
+            product: true,
+          },
+        },
+      },
+    });
+
+    const totalCount = await this.prisma.master.count();
+
+    return {
+      data: masters,
+      totalCount,
+      page,
+      limit,
+      totalPages: Math.ceil(totalCount / limit),
+    };
   }
 
   async findOne(id: number) {
-    try {
-      const one = await this.prisma.master.findUnique({ where: { id } });
-      if (!one) {
-        throw new NotFoundException({ message: 'Master not found' });
-      }
-      return one;
-    } catch (error) {
-      if (error != InternalServerErrorException) {
-        throw error;
-      }
-      console.log(error);
-      throw new InternalServerErrorException({
-        message: 'Internal server error',
-      });
+    const one = await this.prisma.master.findUnique({
+      where: { id },
+      include: {
+        MasterProduct: {
+          include: {
+            level: true,
+            product: true,
+          },
+        },
+      },
+    });
+    if (!one) {
+      throw new NotFoundException({ message: 'Master not found' });
     }
+
+    return one;
   }
 
   async update(id: number, updateMasterDto: UpdateMasterDto) {
-    try {
-      const one = await this.prisma.master.findUnique({ where: { id } });
-      if (!one) {
-        throw new NotFoundException({ message: 'Master not found' });
+    const { MasterProduct, ...masterData } = updateMasterDto;
+
+    return await this.prisma.$transaction(async (prisma) => {
+      const updatedMaster = await prisma.master.update({
+        where: { id },
+        data: masterData,
+      });
+
+      if (MasterProduct && MasterProduct.length > 0) {
+        await prisma.masterProduct.deleteMany({
+          where: { masterId: id },
+        });
+
+        await Promise.all(
+          MasterProduct.map((profession) =>
+            prisma.masterProduct.create({
+              data: {
+                ...profession,
+                masterId: id,
+              },
+            }),
+          ),
+        );
       }
 
-      const updated = await this.prisma.master.update({
-        where: { id },
-        data: updateMasterDto,
-      });
-      return updated;
-    } catch (error) {
-      if (error != InternalServerErrorException) {
-        throw error;
-      }
-      console.log(error);
-      throw new InternalServerErrorException({
-        message: 'Internal server error',
-      });
-    }
+      return updatedMaster;
+    });
   }
 
   async remove(id: number) {
     try {
-      const one = await this.prisma.master.findUnique({ where: { id } });
-      if (!one) {
-        throw new NotFoundException({ message: 'Master not found' });
+      let master = await this.prisma.master.findUnique({ where: { id } });
+      if (!master) {
+        throw Error('Not found');
       }
 
-      const deleted = await this.prisma.master.delete({ where: { id } });
-      return deleted;
-    } catch (error) {
-      if (error != InternalServerErrorException) {
-        throw error;
-      }
-      console.log(error);
-      throw new InternalServerErrorException({
-        message: 'Internal server error',
+      await this.prisma.masterProduct.deleteMany({
+        where: { masterId: id },
       });
+
+      await this.prisma.master.delete({
+        where: { id },
+      });
+      return { message: 'Deleted' };
+    } catch (error) {
+      return { Error: error.message };
     }
+  }
+
+  async findByPhone(phone: string, page: number = 1, pageSize: number = 10) {
+    const skip = (page - 1) * pageSize;
+    const take = pageSize;
+
+    const masters = await this.prisma.master.findMany({
+      where: {
+        phone: phone,
+      },
+      skip,
+      take,
+      include: {
+        MasterProduct: true,
+      },
+    });
+
+    const totalCount = await this.prisma.master.count({
+      where: {
+        phone: phone,
+      },
+    });
+
+    return {
+      data: masters,
+      totalCount,
+      page,
+      pageSize,
+      totalPages: Math.ceil(totalCount / pageSize),
+    };
   }
 }

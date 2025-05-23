@@ -1,4 +1,5 @@
 import {
+  BadRequestException,
   Injectable,
   InternalServerErrorException,
   NotFoundException,
@@ -13,6 +14,12 @@ export class BrandService {
 
   async create(data: CreateBrandDto) {
     try {
+      const brand = await this.prisma.brand.findFirst({
+        where: { name: data.name },
+      });
+      if (brand) {
+        throw new BadRequestException({ message: 'Brand already exists' });
+      }
       const newBrand = await this.prisma.brand.create({ data });
       return newBrand;
     } catch (error) {

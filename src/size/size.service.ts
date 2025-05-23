@@ -1,4 +1,5 @@
 import {
+  BadRequestException,
   Injectable,
   InternalServerErrorException,
   NotFoundException,
@@ -13,6 +14,12 @@ export class SizeService {
 
   async create(data: CreateSizeDto) {
     try {
+      const size = await this.prisma.size.findFirst({
+        where: { name: data.name },
+      });
+      if (size) {
+        throw new BadRequestException({ message: 'Size already exists' });
+      }
       const newSize = await this.prisma.size.create({ data });
       return newSize;
     } catch (error) {

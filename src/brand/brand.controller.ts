@@ -28,12 +28,11 @@ export class BrandController {
     return this.brandService.create(createBrandDto);
   }
 
-  @UseGuards(AuthGuard)
   @Get()
   findAll() {
     return this.brandService.findAll();
   }
-  @UseGuards(AuthGuard)
+
   @Get(':id')
   findOne(@Param('id') id: string) {
     return this.brandService.findOne(+id);

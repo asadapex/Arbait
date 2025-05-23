@@ -17,7 +17,7 @@ export class MailerService {
 
   async sendMail(to: string, subject: string, text: string) {
     const mailOptions = {
-      from: `"Apex Electronics shop" <mrasad.apex@gmail.com>`,
+      from: `"Apex Workers store" <mrasad.apex@gmail.com>`,
       to,
       subject,
       html: text,

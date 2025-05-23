@@ -8,6 +8,7 @@ import {
   Delete,
   UseGuards,
   Req,
+  Query,
 } from '@nestjs/common';
 import { MasterService } from './master.service';
 import { CreateMasterDto } from './dto/create-master.dto';
@@ -17,6 +18,7 @@ import { Request } from 'express';
 import { UserRole } from '@prisma/client';
 import { RolesGuard } from 'src/role/role.guard';
 import { Roles } from 'src/decorators/role-decorator';
+import { ApiProperty } from '@nestjs/swagger';
 
 @Controller('master')
 export class MasterController {
@@ -26,21 +28,17 @@ export class MasterController {
   @UseGuards(RolesGuard)
   @UseGuards(AuthGuard)
   @Post()
-  create(@Body() createMasterDto: CreateMasterDto, @Req() req: Request) {
-    return this.masterService.create(createMasterDto, req);
+  create(@Body() createMasterDto: CreateMasterDto) {
+    return this.masterService.create(createMasterDto);
   }
 
-  @Roles(UserRole.ADMIN)
-  @UseGuards(RolesGuard)
-  @UseGuards(AuthGuard)
   @Get()
-  findAll(@Req() req: Request) {
-    return this.masterService.findAll(req);
+  @ApiProperty({ name: 'limit', required: false, example: 10 })
+  @ApiProperty({ name: 'page', required: false, example: 1 })
+  findAll(@Query() query: any) {
+    return this.masterService.findAll(query);
   }
 
-  @Roles(UserRole.ADMIN)
-  @UseGuards(RolesGuard)
-  @UseGuards(AuthGuard)
   @Get(':id')
   findOne(@Param('id') id: string) {
     return this.masterService.findOne(+id);

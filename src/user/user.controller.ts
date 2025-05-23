@@ -6,12 +6,16 @@ import {
   Patch,
   Param,
   Delete,
+  Req,
+  UseGuards,
 } from '@nestjs/common';
 import { UserService } from './user.service';
 import { CreateUserDto } from './dto/create-user.dto';
 import { VerifyUserDto } from './dto/verify-user.dto';
 import { ResendOtpAuthDto } from './dto/resend-otp.dto';
 import { LoginUserDto } from './dto/login-user.dto';
+import { Request } from 'express';
+import { AuthGuard } from 'src/auth/auth.guard';
 
 @Controller('auth')
 export class UserController {
@@ -33,7 +37,13 @@ export class UserController {
   }
 
   @Post('login')
-  login(@Body() data: LoginUserDto) {
-    return this.userService.login(data);
+  login(@Body() data: LoginUserDto, @Req() req: Request) {
+    return this.userService.login(data, req);
+  }
+
+  @UseGuards(AuthGuard)
+  @Get('allSessions')
+  getSessions(@Req() req: Request) {
+    return this.userService.allSession(req);
   }
 }
