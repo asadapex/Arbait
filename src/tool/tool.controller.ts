@@ -44,7 +44,7 @@ export class ToolController {
     return this.toolService.findOne(+id);
   }
 
-  @Roles(UserRole.ADMIN)
+  @Roles(UserRole.ADMIN, UserRole.SUPERADMIN)
   @UseGuards(RolesGuard)
   @UseGuards(AuthGuard)
   @Patch(':id')

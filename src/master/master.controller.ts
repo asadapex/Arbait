@@ -44,7 +44,7 @@ export class MasterController {
     return this.masterService.findOne(+id);
   }
 
-  @Roles(UserRole.ADMIN)
+  @Roles(UserRole.ADMIN, UserRole.SUPERADMIN)
   @UseGuards(RolesGuard)
   @UseGuards(AuthGuard)
   @Patch(':id')

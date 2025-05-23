@@ -38,7 +38,7 @@ export class BrandController {
     return this.brandService.findOne(+id);
   }
 
-  @Roles(UserRole.ADMIN)
+  @Roles(UserRole.ADMIN, UserRole.SUPERADMIN)
   @UseGuards(RolesGuard)
   @UseGuards(AuthGuard)
   @Patch(':id')

@@ -31,7 +31,7 @@ export class CreateUserDto {
   @Min(1)
   regionId: number;
 
-  @ApiProperty({ enum: UserRole, example: UserRole.USER })
+  @ApiProperty({ enum: UserRole, example: UserRole.USER_FIZ })
   @IsEnum(UserRole)
   role: UserRole;
 

@@ -26,7 +26,7 @@ export class CommentController {
     return this.commentService.create(createCommentDto);
   }
 
-  @Roles(UserRole.ADMIN)
+  @Roles(UserRole.ADMIN, UserRole.VIEWERADMIN)
   @UseGuards(RolesGuard)
   @UseGuards(AuthGuard)
   @Get()

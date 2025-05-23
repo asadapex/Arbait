@@ -20,9 +20,9 @@ import { UserRole } from '@prisma/client';
 export class RegionController {
   constructor(private readonly regionService: RegionService) {}
 
-  // @Roles(UserRole.ADMIN)
-  // @UseGuards(RolesGuard)
-  // @UseGuards(AuthGuard)
+  @Roles(UserRole.ADMIN)
+  @UseGuards(RolesGuard)
+  @UseGuards(AuthGuard)
   @Post()
   create(@Body() createRegionDto: CreateRegionDto) {
     return this.regionService.create(createRegionDto);
@@ -38,7 +38,7 @@ export class RegionController {
     return this.regionService.findOne(+id);
   }
 
-  @Roles(UserRole.ADMIN)
+  @Roles(UserRole.ADMIN, UserRole.SUPERADMIN)
   @UseGuards(RolesGuard)
   @UseGuards(AuthGuard)
   @Patch(':id')

@@ -27,7 +27,7 @@ export class OrderController {
     return this.orderService.create(createOrderDto, request);
   }
 
-  @Roles(UserRole.ADMIN)
+  @Roles(UserRole.ADMIN, UserRole.VIEWERADMIN)
   @UseGuards(AuthGuard)
   @Get()
   findAll() {
@@ -40,7 +40,7 @@ export class OrderController {
     return this.orderService.findOne(+id);
   }
 
-  @Roles(UserRole.ADMIN)
+  @Roles(UserRole.ADMIN, UserRole.SUPERADMIN)
   @UseGuards(AuthGuard)
   @Patch(':id')
   update(@Param('id') id: string, @Body() updateOrderDto: UpdateOrderDto) {

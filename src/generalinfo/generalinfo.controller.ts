@@ -36,7 +36,7 @@ export class GeneralInfoController {
     return this.generalInfoService.findOne(+id);
   }
 
-  @Roles(UserRole.ADMIN)
+  @Roles(UserRole.ADMIN, UserRole.SUPERADMIN)
   @UseGuards(AuthGuard)
   @Patch(':id')
   update(
