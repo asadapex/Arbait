@@ -26,7 +26,7 @@ export class BasketController {
   }
 
   @UseGuards(AuthGuard)
-  @Get(':id')
+  @Get('mybasket')
   findOne(@Req() request: Request) {
     return this.basketService.findOne(request);
   }

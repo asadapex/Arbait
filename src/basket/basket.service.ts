@@ -38,7 +38,7 @@ export class BasketService {
 
   async findOne(request: Request) {
     let userId = request['user-id'];
-    let basket = await this.prisma.basket.findFirst({
+    let basket = await this.prisma.basket.findMany({
       where: { userId: userId },
     });
     return basket;

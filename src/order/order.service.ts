@@ -9,10 +9,14 @@ import { UpdateOrderDto } from './dto/update-order.dto';
 import { PrismaService } from 'src/prisma/prisma.service';
 import { Request } from 'express';
 import { OrderStatus, PaymentType } from '@prisma/client';
+import { TgBotService } from 'src/tg_bot/tg_bot.service';
 
 @Injectable()
 export class OrderService {
-  constructor(private readonly prisma: PrismaService) {}
+  constructor(
+    private readonly prisma: PrismaService,
+    private tgBotService: TgBotService,
+  ) {}
 
   async create(createOrderDto: CreateOrderDto, request: Request) {
     let ownerId = request['user-id'];
@@ -63,6 +67,11 @@ export class OrderService {
         },
       });
     }
+
+    await this.tgBotService.sendOrderDetailsToUser(
+      request['user-id'],
+      newOrder.id,
+    );
 
     return newOrder;
   }

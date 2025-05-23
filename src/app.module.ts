@@ -19,6 +19,7 @@ import { BasketModule } from './basket/basket.module';
 import { FaqModule } from './faq/faq.module';
 import { ContactModule } from './contact/contact.module';
 import { GeneralInfoModule } from './generalinfo/generalinfo.module';
+import { TgBotModule } from './tg_bot/tg_bot.module';
 
 @Module({
   imports: [
@@ -42,6 +43,7 @@ import { GeneralInfoModule } from './generalinfo/generalinfo.module';
     FaqModule,
     ContactModule,
     GeneralInfoModule,
+    TgBotModule,
   ],
   controllers: [AppController],
   providers: [AppService, MailerService],
