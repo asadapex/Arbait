@@ -57,6 +57,14 @@ export class UserService {
         throw new BadRequestException({ message: 'User already exists' });
       }
 
+      const reg = await this.prisma.region.findUnique({
+        where: { id: data.regionId },
+      });
+
+      if (!reg) {
+        throw new NotFoundException({ message: 'Region not found' });
+      }
+
       const otp = totp.generate(data.email + 'apex');
       await this.mailService.sendMail(
         data.email,
