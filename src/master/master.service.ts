@@ -45,13 +45,25 @@ export class MasterService {
   async findAll(query: any) {
     const page = parseInt(query.page) || 1;
     const limit = parseInt(query.limit) || 10;
-
     const skip = (page - 1) * limit;
     const take = limit;
+
+    const nameFilter = query.name || '';
+    const sortField = query.sort || 'id';
+    const sortOrder = query.order === 'desc' ? 'desc' : 'asc';
 
     const masters = await this.prisma.master.findMany({
       skip,
       take,
+      where: {
+        fullname: {
+          contains: nameFilter,
+          mode: 'insensitive',
+        },
+      },
+      orderBy: {
+        [sortField]: sortOrder,
+      },
       include: {
         MasterProduct: {
           include: {
@@ -62,7 +74,14 @@ export class MasterService {
       },
     });
 
-    const totalCount = await this.prisma.master.count();
+    const totalCount = await this.prisma.master.count({
+      where: {
+        fullname: {
+          contains: nameFilter,
+          mode: 'insensitive',
+        },
+      },
+    });
 
     return {
       data: masters,
