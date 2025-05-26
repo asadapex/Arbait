@@ -65,6 +65,7 @@ export class MasterService {
           fullname: sortOrder,
         },
         include: {
+          MasterStar: true,
           MasterProduct: {
             include: {
               level: true,
@@ -83,8 +84,21 @@ export class MasterService {
       }),
     ]);
 
+    const mastersWithAvgStar = masters.map((master) => {
+      const stars = master.MasterStar;
+      const avgStar =
+        stars.length > 0
+          ? stars.reduce((acc, curr) => acc + curr.star, 0) / stars.length
+          : 0;
+
+      return {
+        ...master,
+        avgStar,
+      };
+    });
+
     return {
-      data: masters,
+      data: mastersWithAvgStar,
       totalCount,
       page,
       limit,
