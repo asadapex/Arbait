@@ -18,7 +18,7 @@ import { Request } from 'express';
 import { UserRole } from '@prisma/client';
 import { RolesGuard } from 'src/role/role.guard';
 import { Roles } from 'src/decorators/role-decorator';
-import { ApiProperty } from '@nestjs/swagger';
+import { ApiQuery } from '@nestjs/swagger';
 
 @Controller('master')
 export class MasterController {
@@ -33,8 +33,8 @@ export class MasterController {
   }
 
   @Get()
-  @ApiProperty({ name: 'limit', required: false, example: 10 })
-  @ApiProperty({ name: 'page', required: false, example: 1 })
+  @ApiQuery({ name: 'limit', required: false, example: 10 })
+  @ApiQuery({ name: 'page', required: false, example: 1 })
   findAll(@Query() query: any) {
     return this.masterService.findAll(query);
   }
