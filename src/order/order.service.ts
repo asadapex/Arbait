@@ -93,6 +93,14 @@ export class OrderService {
 
     await this.tgBotService.sendOrderDetailsToUser(ownerId, newOrder.id);
 
+    const basket = await this.prisma.basket.findFirst({
+      where: { userId: ownerId },
+    });
+
+    if (basket) {
+      await this.prisma.basket.deleteMany({ where: { userId: ownerId } });
+    }
+
     return newOrder;
   }
 
