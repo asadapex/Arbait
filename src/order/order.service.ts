@@ -19,59 +19,59 @@ export class OrderService {
   ) {}
 
   async create(createOrderDto: CreateOrderDto, request: Request) {
-    let ownerId = request['user-id'];
+    const ownerId = request['user-id'];
+    if (!ownerId) throw new UnauthorizedException();
 
-    if (!ownerId) {
-      throw new UnauthorizedException();
-    }
-    if (createOrderDto.orderProduct.length == 0) {
+    if (
+      !createOrderDto.orderProduct ||
+      createOrderDto.orderProduct.length === 0
+    ) {
       throw new BadRequestException('Maxsulotlarni tanlang');
     }
+
     const { orderProduct, ...order } = createOrderDto;
 
-    let tool = await this.prisma.tools.findMany({
-      where: { id: orderProduct[0].toolId },
-    });
-    if (tool) {
-      if (!tool) {
-        throw new NotFoundException('Not found Tool');
-      }
-    }
-    let Level = await this.prisma.level.findUnique({
-      where: { id: orderProduct[0].levelId },
-    });
-    if (Level) {
-      if (!Level) {
-        throw new NotFoundException('Not found Level');
-      }
-    }
-    let profession = await this.prisma.product.findUnique({
-      where: { id: orderProduct[0].productId },
-    });
-    if (profession) {
-      if (!profession) {
-        throw new NotFoundException('Not found Product');
-      }
+    for (const item of orderProduct) {
+      const tool = await this.prisma.tools.findUnique({
+        where: { id: item.toolId },
+      });
+      if (!tool)
+        throw new NotFoundException(`Tool with id ${item.toolId} not found`);
+
+      const level = await this.prisma.level.findUnique({
+        where: { id: item.levelId },
+      });
+      if (!level)
+        throw new NotFoundException(`Level with id ${item.levelId} not found`);
+
+      const product = await this.prisma.product.findUnique({
+        where: { id: item.productId },
+      });
+      if (!product)
+        throw new NotFoundException(
+          `Product with id ${item.productId} not found`,
+        );
     }
 
-    let newOrder = await this.prisma.order.create({
-      data: { ...order, userId: ownerId, status: OrderStatus.PENDING },
+    const newOrder = await this.prisma.order.create({
+      data: {
+        ...order,
+        userId: ownerId,
+        status: OrderStatus.PENDING,
+      },
     });
 
-    for (let i = 0; i < orderProduct.length; i++) {
+    for (const item of orderProduct) {
       await this.prisma.orderProduct.create({
         data: {
           orderId: newOrder.id,
-          ...orderProduct[i],
+          ...item,
           isActive: true,
         },
       });
     }
 
-    await this.tgBotService.sendOrderDetailsToUser(
-      request['user-id'],
-      newOrder.id,
-    );
+    await this.tgBotService.sendOrderDetailsToUser(ownerId, newOrder.id);
 
     return newOrder;
   }
