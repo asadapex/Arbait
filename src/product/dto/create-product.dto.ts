@@ -8,6 +8,16 @@ export class CreateProductDto {
   @IsString()
   name: string;
 
+  @ApiProperty({ type: String, example: 'Santexnik' })
+  @IsString()
+  @IsOptional()
+  name_ru?: string;
+
+  @ApiProperty({ type: String, example: 'Santexnik' })
+  @IsString()
+  @IsOptional()
+  name_eng?: string;
+
   @ApiProperty({
     example: 'image link',
   })

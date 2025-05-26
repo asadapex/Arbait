@@ -16,6 +16,16 @@ export class CreateToolDto {
   @MinLength(2, { message: 'Name must be at least 2 characters long' })
   name: string;
 
+  @ApiProperty({ type: String, example: 'Drel' })
+  @IsString()
+  @IsOptional()
+  name_ru?: string;
+
+  @ApiProperty({ type: String, example: 'Drel' })
+  @IsString()
+  @IsOptional()
+  name_eng?: string;
+
   @ApiProperty({
     example: 'Karochi ishlatiladida qayerdadur',
   })

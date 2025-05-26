@@ -13,6 +13,12 @@ export class ProductService {
 
   async create(data: CreateProductDto) {
     try {
+      const prd = await this.prisma.product.findFirst({
+        where: { name: data.name },
+      });
+      if (prd) {
+        throw new BadRequestException({ message: 'Product already exists' });
+      }
       const product = await this.prisma.product.create({
         data: { ...data },
       });

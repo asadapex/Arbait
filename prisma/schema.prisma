@@ -34,8 +34,11 @@ model User {
 }
 
 model Region {
-  id   Int    @id @default(autoincrement())
-  name String @unique
+  id       Int     @id @default(autoincrement())
+  name     String
+  name_ru  String?
+  name_eng String?
+
   user User[]
 }
 
@@ -49,7 +52,9 @@ model Session {
 
 model Level {
   id               Int             @id @default(autoincrement())
-  name             String          @unique
+  name             String
+  name_ru          String?
+  name_eng         String?
   product          orderProduct[]
   productLevel     ProductLevel[]
   masterProfession MasterProduct[]
@@ -74,21 +79,27 @@ model MasterStar {
 }
 
 model Brand {
-  id    Int     @id @default(autoincrement())
-  name  String  @unique
-  tools Tools[]
+  id       Int     @id @default(autoincrement())
+  name     String
+  name_ru  String?
+  name_eng String?
+  tools    Tools[]
 }
 
 model Capacity {
-  id    Int     @id @default(autoincrement())
-  name  String  @unique
-  tools Tools[]
+  id       Int     @id @default(autoincrement())
+  name     String
+  name_ru  String?
+  name_eng String?
+  tools    Tools[]
 }
 
 model Size {
-  id    Int     @id @default(autoincrement())
-  name  String  @unique
-  tools Tools[]
+  id       Int     @id @default(autoincrement())
+  name     String
+  name_ru  String?
+  name_eng String?
+  tools    Tools[]
 }
 
 model Master {
@@ -132,6 +143,8 @@ model ProductLevel {
 model Product {
   id               Int             @id @default(autoincrement())
   name             String
+  name_ru          String?
+  name_eng         String?
   image            String?
   isActive         Boolean
   orderProduct     orderProduct[]
@@ -144,6 +157,8 @@ model Product {
 model Tools {
   id           Int            @id @default(autoincrement())
   name         String
+  name_ru      String?
+  name_eng     String?
   description  String
   price        Int
   quantity     Int

@@ -1,4 +1,5 @@
 import {
+  BadRequestException,
   Injectable,
   InternalServerErrorException,
   NotFoundException,
@@ -12,6 +13,12 @@ export class RegionService {
   constructor(private readonly prisma: PrismaService) {}
   async create(data: CreateRegionDto) {
     try {
+      const region = await this.prisma.region.findFirst({
+        where: { name: data.name },
+      });
+      if (region) {
+        throw new BadRequestException({ message: 'Region already exists' });
+      }
       const newRegion = await this.prisma.region.create({ data });
       return newRegion;
     } catch (error) {

@@ -1,4 +1,5 @@
 import {
+  BadRequestException,
   Injectable,
   InternalServerErrorException,
   NotFoundException,
@@ -13,6 +14,12 @@ export class LevelService {
 
   async create(data: CreateLevelDto) {
     try {
+      const level = await this.prisma.level.findFirst({
+        where: { name: data.name },
+      });
+      if (level) {
+        throw new BadRequestException({ message: 'Level already exists' });
+      }
       const newLevel = await this.prisma.level.create({ data });
       return newLevel;
     } catch (error) {
