@@ -43,45 +43,45 @@ export class MasterService {
   }
 
   async findAll(query: any) {
+    const fullname = query.fullname?.trim() ?? '';
     const page = parseInt(query.page) || 1;
     const limit = parseInt(query.limit) || 10;
     const skip = (page - 1) * limit;
     const take = limit;
 
-    const nameFilter = query.name || '';
-    const sortField = query.sort || 'id';
-    const sortOrder = query.order === 'desc' ? 'desc' : 'asc';
+    const sortOrder = query.sort === 'desc' ? 'desc' : 'asc';
 
-    const masters = await this.prisma.master.findMany({
-      skip,
-      take,
-      where: {
-        fullname: {
-          contains: nameFilter,
-          mode: 'insensitive',
-        },
-      },
-      orderBy: {
-        [sortField]: sortOrder,
-      },
-      include: {
-        MasterProduct: {
-          include: {
-            level: true,
-            product: true,
+    const [masters, totalCount] = await this.prisma.$transaction([
+      this.prisma.master.findMany({
+        skip,
+        take,
+        where: {
+          fullname: {
+            contains: fullname,
+            mode: 'insensitive',
           },
         },
-      },
-    });
-
-    const totalCount = await this.prisma.master.count({
-      where: {
-        fullname: {
-          contains: nameFilter,
-          mode: 'insensitive',
+        orderBy: {
+          fullname: sortOrder,
         },
-      },
-    });
+        include: {
+          MasterProduct: {
+            include: {
+              level: true,
+              product: true,
+            },
+          },
+        },
+      }),
+      this.prisma.master.count({
+        where: {
+          fullname: {
+            contains: fullname,
+            mode: 'insensitive',
+          },
+        },
+      }),
+    ]);
 
     return {
       data: masters,

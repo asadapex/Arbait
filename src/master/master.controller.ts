@@ -34,34 +34,23 @@ export class MasterController {
 
   @Get()
   @ApiQuery({
-    name: 'name',
+    name: 'fullname',
     required: false,
-    example: 'ali',
-    description: 'Filter by name (contains)',
   })
   @ApiQuery({
     name: 'page',
     required: false,
     example: 1,
-    description: 'Page number (pagination)',
   })
   @ApiQuery({
     name: 'limit',
     required: false,
     example: 10,
-    description: 'Items per page (pagination)',
   })
   @ApiQuery({
     name: 'sort',
     required: false,
-    example: 'name',
-    description: 'Field to sort by (e.g. name, id)',
-  })
-  @ApiQuery({
-    name: 'order',
-    required: false,
-    example: 'asc',
-    description: 'Sort order: asc | desc',
+    enum: ['asc', 'desc'],
   })
   findAll(@Query() query: any) {
     return this.masterService.findAll(query);
