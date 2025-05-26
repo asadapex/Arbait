@@ -13,7 +13,7 @@ import { VerifyUserDto } from './dto/verify-user.dto';
 import { ResendOtpAuthDto } from './dto/resend-otp.dto';
 import { LoginUserDto } from './dto/login-user.dto';
 import { JwtService } from '@nestjs/jwt';
-import { UserStatus } from '@prisma/client';
+import { UserRole, UserStatus } from '@prisma/client';
 import { Request } from 'express';
 import { CreateAdminDto } from './dto/create-admin.dto';
 
@@ -58,6 +58,16 @@ export class UserService {
         throw new BadRequestException({ message: 'User already exists' });
       }
 
+      if (
+        data.role == UserRole.ADMIN ||
+        data.role == UserRole.SUPERADMIN ||
+        data.role == UserRole.VIEWERADMIN
+      ) {
+        throw new BadRequestException({
+          message: 'Admin roles are not allowed',
+        });
+      }
+
       const reg = await this.prisma.region.findUnique({
         where: { id: data.regionId },
       });
@@ -75,7 +85,7 @@ export class UserService {
 
       const hash = bcrypt.hashSync(data.password, 10);
 
-      const newUser = await this.prisma.user.create({
+      await this.prisma.user.create({
         data: { ...data, status: UserStatus.PENDING, password: hash },
       });
 

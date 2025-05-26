@@ -22,54 +22,74 @@ export class OrderService {
     const ownerId = request['user-id'];
     if (!ownerId) throw new UnauthorizedException();
 
-    if (
-      !createOrderDto.orderProduct ||
-      createOrderDto.orderProduct.length === 0
-    ) {
+    const { orderProduct, ...orderData } = createOrderDto;
+    if (!orderProduct || orderProduct.length === 0) {
       throw new BadRequestException('Maxsulotlarni tanlang');
     }
-
-    const { orderProduct, ...order } = createOrderDto;
 
     for (const item of orderProduct) {
       const tool = await this.prisma.tools.findUnique({
         where: { id: item.toolId },
       });
-      if (!tool)
+      if (!tool) {
         throw new NotFoundException(`Tool with id ${item.toolId} not found`);
+      }
+      if (tool.quantity < item.count) {
+        throw new BadRequestException(
+          `Tool "${tool.name}" stolkda ${tool.quantity} dona bor, siz ${item.count} dona talab qildingiz`,
+        );
+      }
 
       const level = await this.prisma.level.findUnique({
         where: { id: item.levelId },
       });
-      if (!level)
+      if (!level) {
         throw new NotFoundException(`Level with id ${item.levelId} not found`);
+      }
 
       const product = await this.prisma.product.findUnique({
         where: { id: item.productId },
       });
-      if (!product)
+      if (!product) {
         throw new NotFoundException(
           `Product with id ${item.productId} not found`,
         );
+      }
     }
 
-    const newOrder = await this.prisma.order.create({
-      data: {
-        ...order,
-        userId: ownerId,
-        status: OrderStatus.PENDING,
-      },
-    });
+    const [newOrder] = await this.prisma.$transaction([
+      this.prisma.order.create({
+        data: {
+          ...orderData,
+          userId: ownerId,
+          status: OrderStatus.PENDING,
+        },
+      }),
+    ]);
 
-    for (const item of orderProduct) {
-      await this.prisma.orderProduct.create({
+    const ops = orderProduct.flatMap((item) => [
+      this.prisma.orderProduct.create({
         data: {
           orderId: newOrder.id,
-          ...item,
+          toolId: item.toolId,
+          levelId: item.levelId,
+          productId: item.productId,
+          workingTime: item.workingTime,
+          price: item.price,
+          count: item.count,
+          timeUnit: item.timeUnit,
           isActive: true,
         },
-      });
-    }
+      }),
+      this.prisma.tools.update({
+        where: { id: item.toolId },
+        data: {
+          quantity: { decrement: item.count },
+        },
+      }),
+    ]);
+
+    await this.prisma.$transaction(ops);
 
     await this.tgBotService.sendOrderDetailsToUser(ownerId, newOrder.id);
 
