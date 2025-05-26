@@ -16,6 +16,10 @@ import { ResendOtpAuthDto } from './dto/resend-otp.dto';
 import { LoginUserDto } from './dto/login-user.dto';
 import { Request } from 'express';
 import { AuthGuard } from 'src/auth/auth.guard';
+import { UserRole } from '@prisma/client';
+import { Roles } from 'src/decorators/role-decorator';
+import { RolesGuard } from 'src/role/role.guard';
+import { CreateAdminDto } from './dto/create-admin.dto';
 
 @Controller('auth')
 export class UserController {
@@ -57,5 +61,13 @@ export class UserController {
   @Get('me')
   me(@Req() req: Request) {
     return this.userService.me(req);
+  }
+
+  @Roles(UserRole.ADMIN)
+  @UseGuards(RolesGuard)
+  @UseGuards(AuthGuard)
+  @Post('create-admin')
+  async createAdmin(createAdminDto: CreateAdminDto) {
+    return this.userService.createAdmin(createAdminDto);
   }
 }
