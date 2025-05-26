@@ -15,6 +15,7 @@ import { LoginUserDto } from './dto/login-user.dto';
 import { JwtService } from '@nestjs/jwt';
 import { UserStatus } from '@prisma/client';
 import { Request } from 'express';
+import { CreateAdminDto } from './dto/create-admin.dto';
 
 totp.options = {
   step: 120,
@@ -193,6 +194,30 @@ export class UserService {
       where: { userId: user },
     });
     return { session };
+  }
+
+  async deleteSession(id: number) {
+    try {
+      let session = await this.prisma.session.findUnique({ where: { id: id } });
+      if (!session) {
+        throw new NotFoundException();
+      }
+      await this.prisma.session.delete({ where: { id } });
+    } catch (error) {
+      throw new Error(error.message);
+    }
+  }
+
+  async createAdmin(createAdminDto: CreateAdminDto) {
+    let admin = await this.findUser(createAdminDto.email);
+    if (admin) {
+      throw new BadRequestException('This account is already taken');
+    }
+    const hash = bcrypt.hashSync(createAdminDto.password, 10);
+    let newAdmin = await this.prisma.user.create({
+      data: { ...createAdminDto, password: hash, status: UserStatus.ACTIVE },
+    });
+    return newAdmin;
   }
 
   async me(req: Request) {

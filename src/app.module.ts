@@ -20,6 +20,7 @@ import { FaqModule } from './faq/faq.module';
 import { ContactModule } from './contact/contact.module';
 import { GeneralInfoModule } from './generalinfo/generalinfo.module';
 import { TgBotModule } from './tg_bot/tg_bot.module';
+import { MulterModule } from './multer/multer.module';
 
 @Module({
   imports: [
@@ -44,6 +45,7 @@ import { TgBotModule } from './tg_bot/tg_bot.module';
     ContactModule,
     GeneralInfoModule,
     TgBotModule,
+    MulterModule,
   ],
   controllers: [AppController],
   providers: [AppService, MailerService],

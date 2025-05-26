@@ -48,6 +48,12 @@ export class UserController {
   }
 
   @UseGuards(AuthGuard)
+  @Delete('session:id')
+  removeSession(@Param('id') id: string) {
+    return this.userService.deleteSession(+id);
+  }
+
+  @UseGuards(AuthGuard)
   @Get('me')
   me(@Req() req: Request) {
     return this.userService.me(req);
