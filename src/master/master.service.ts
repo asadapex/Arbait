@@ -43,7 +43,9 @@ export class MasterService {
   }
 
   async findAll(query: any) {
-    const { page = 1, limit = 10 } = query;
+    const page = parseInt(query.page) || 1;
+    const limit = parseInt(query.limit) || 10;
+
     const skip = (page - 1) * limit;
     const take = limit;
 
