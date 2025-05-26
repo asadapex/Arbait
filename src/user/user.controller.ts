@@ -3,7 +3,6 @@ import {
   Get,
   Post,
   Body,
-  Patch,
   Param,
   Delete,
   Req,
@@ -67,7 +66,7 @@ export class UserController {
   @UseGuards(RolesGuard)
   @UseGuards(AuthGuard)
   @Post('create-admin')
-  async createAdmin(createAdminDto: CreateAdminDto) {
+  async createAdmin(@Body() createAdminDto: CreateAdminDto) {
     return this.userService.createAdmin(createAdminDto);
   }
 }

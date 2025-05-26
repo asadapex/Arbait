@@ -1,6 +1,6 @@
 import { ApiProperty } from '@nestjs/swagger';
-import { User, UserRole, UserStatus } from '@prisma/client';
-import { IsEnum, IsString, IsPhoneNumber, IsNumber } from 'class-validator';
+import { UserRole } from '@prisma/client';
+import { IsEnum, IsString, IsNumber } from 'class-validator';
 
 export class CreateAdminDto {
   @ApiProperty({ example: 'John Doe' })
